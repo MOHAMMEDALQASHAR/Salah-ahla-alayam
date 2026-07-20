@@ -8,4 +8,4 @@ bcrypt
 python-multipart
 pydantic
 pydantic-settings
-
+python-dotenv

@@ -7,8 +7,11 @@ from .auth import get_current_admin
 
 router = APIRouter(prefix="/images", tags=["images"])
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+UPLOAD_DIR = "/tmp/uploads" if os.environ.get("VERCEL") else "uploads"
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except Exception:
+    pass
 
 @router.post("/", response_model=schemas.Image)
 def upload_image(file: UploadFile = File(...), row: str = Form("top"), db = Depends(database.get_db), current_admin = Depends(get_current_admin)):

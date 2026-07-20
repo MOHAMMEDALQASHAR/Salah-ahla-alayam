@@ -11,8 +11,11 @@ import threading
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+UPLOAD_DIR = "/tmp/uploads" if os.environ.get("VERCEL") else "uploads"
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except Exception:
+    pass
 
 @router.get("/check/{date}", response_model=dict)
 def check_availability(date: datetime.date, db = Depends(database.get_db)):
