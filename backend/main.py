@@ -23,8 +23,13 @@ app.include_router(images.router)
 app.include_router(settings.router)
 
 # Serve uploaded images
-os.makedirs("uploads", exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+try:
+    os.makedirs("uploads", exist_ok=True)
+except Exception:
+    pass
+
+if os.path.exists("uploads"):
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Serve Frontend static files
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")

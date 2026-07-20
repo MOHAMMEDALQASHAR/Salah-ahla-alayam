@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pymongo[srv]
+dnspython
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+python-multipart
+pydantic
+pydantic-settings
