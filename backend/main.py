@@ -1,5 +1,9 @@
 import sys
 import os
+from dotenv import load_dotenv
+
+# Load .env for local development
+load_dotenv()
 
 # Ensure backend directory is in sys.path for Vercel
 backend_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from routers import auth, bookings, images, settings
+import database
 
 app = FastAPI(title="Ahla Al-Ayam Hall API")
 
@@ -73,3 +78,26 @@ def read_admin():
             }
         )
     return {"message": "Admin interface not found."}
+
+@app.get("/health")
+def health_check():
+    """Check database connectivity"""
+    try:
+        db = database.get_db()
+        # Ping the database
+        db.command("ping")
+        return {
+            "status": "ok",
+            "database": "connected",
+            "uri_set": bool(os.getenv("MONGODB_URI")),
+            "vercel": bool(os.environ.get("VERCEL"))
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "database": "disconnected",
+            "error": str(e),
+            "uri_set": bool(os.getenv("MONGODB_URI")),
+            "vercel": bool(os.environ.get("VERCEL"))
+        }
+
