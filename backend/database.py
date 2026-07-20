@@ -1,4 +1,5 @@
 import os
+import certifi
 from dotenv import load_dotenv
 
 # Load .env file if it exists (for local development)
@@ -28,6 +29,8 @@ def _get_client():
             socketTimeoutMS=10000,
             maxPoolSize=10,
             retryWrites=True,
+            tls=True,
+            tlsCAFile=certifi.where(),
         )
     return _client
 
