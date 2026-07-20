@@ -70,13 +70,17 @@ h1, h2, h3, h4 {
 
 /* Header */
 header {
-    background: rgba(15, 17, 21, 0.9);
+    background: rgba(15, 17, 21, 0.95);
     backdrop-filter: blur(10px);
-    position: sticky;
+    -webkit-backdrop-filter: blur(10px);
+    position: fixed;
     top: 0;
-    z-index: 100;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    padding: 15px 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 12px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .navbar {
@@ -460,27 +464,66 @@ table th {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    header {
+        padding: 8px 0;
+    }
+
     .navbar {
         flex-direction: column;
-        gap: 15px;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .logo {
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+    }
+    
+    .nav-links {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 2px;
+    }
+
+    .nav-links::-webkit-scrollbar {
+        display: none;
     }
     
     .nav-links a {
-        margin: 0 10px;
-        font-size: 0.95rem;
+        margin: 0;
+        font-size: 0.85rem;
+        padding: 5px 12px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 20px;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    .hero {
+        margin-top: 75px;
+        height: calc(85vh - 75px);
     }
 
     .hero h1 {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
     }
 
     .hero p {
-        font-size: 1rem;
+        font-size: 0.95rem;
         padding: 0 15px;
     }
 
     .section-title {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .pricing-card {
@@ -488,7 +531,7 @@ table th {
     }
 
     .price {
-        font-size: 2.5rem;
+        font-size: 2.2rem;
     }
 
     .admin-layout {
@@ -540,21 +583,33 @@ table th {
 }
 
 @media (max-width: 480px) {
-    .hero h1 {
-        font-size: 2rem;
+    .hero {
+        margin-top: 80px;
+        height: calc(85vh - 80px);
     }
-    
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
     .nav-links {
         display: flex;
-        flex-direction: column;
-        gap: 10px;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
     }
     
     .nav-links a {
         margin: 0;
+        font-size: 0.8rem;
+        padding: 4px 10px;
     }
 
     .booking-form {
-        padding: 20px;
+        padding: 15px;
     }
 }
