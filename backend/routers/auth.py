@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-import crud, models, schemas, database
+import crud, schemas, database
 import os
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -24,7 +23,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
+def get_current_admin(token: str = Depends(oauth2_scheme), db = Depends(database.get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -44,9 +43,9 @@ def get_current_admin(token: str = Depends(oauth2_scheme), db: Session = Depends
     return admin
 
 @router.post("/token", response_model=schemas.Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db = Depends(database.get_db)):
     admin = crud.get_admin(db, username=form_data.username)
-    if not admin or not crud.verify_password(form_data.password, admin.hashed_password):
+    if not admin or not crud.verify_password(form_data.password, admin["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -54,6 +53,6 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": admin.username}, expires_delta=access_token_expires
+        data={"sub": admin["username"]}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}

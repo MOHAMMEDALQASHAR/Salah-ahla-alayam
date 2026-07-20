@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 import datetime
 
 # Admin Schemas
@@ -10,7 +10,7 @@ class AdminCreate(AdminBase):
     password: str
 
 class Admin(AdminBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -22,12 +22,14 @@ class BookingBase(BaseModel):
     contact_phone: str
     id_card_number: Optional[str] = ""
     event_type: Optional[str] = ""
+    pay_deposit: Optional[str] = "لا"
+    deposit_receipt: Optional[str] = ""
 
 class BookingCreate(BookingBase):
     pass
 
 class Booking(BookingBase):
-    id: int
+    id: str
     status: str
     created_at: datetime.datetime
 
@@ -43,7 +45,7 @@ class SettingCreate(SettingBase):
     pass
 
 class Setting(SettingBase):
-    id: int
+    id: str
 
     class Config:
         from_attributes = True
@@ -51,12 +53,13 @@ class Setting(SettingBase):
 # Image Schemas
 class ImageBase(BaseModel):
     filename: str
+    row: str = "top"
 
 class ImageCreate(ImageBase):
     pass
 
 class Image(ImageBase):
-    id: int
+    id: str
     uploaded_at: datetime.datetime
 
     class Config:

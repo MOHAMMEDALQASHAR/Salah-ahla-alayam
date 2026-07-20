@@ -2,12 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import models, database
 from routers import auth, bookings, images, settings
 import os
-
-# Create DB tables
-models.Base.metadata.create_all(bind=database.engine)
 
 app = FastAPI(title="Ahla Al-Ayam Hall API")
 
@@ -39,12 +35,26 @@ if os.path.exists(frontend_dir):
 def read_root():
     index_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
     if os.path.exists(index_path):
-        return FileResponse(index_path)
+        return FileResponse(
+            index_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "Welcome to Ahla Al-Ayam Hall API. Frontend not found."}
 
 @app.get("/admin")
 def read_admin():
     admin_path = os.path.join(os.path.dirname(__file__), "..", "frontend", "admin.html")
     if os.path.exists(admin_path):
-        return FileResponse(admin_path)
+        return FileResponse(
+            admin_path,
+            headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
     return {"message": "Admin interface not found."}

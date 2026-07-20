@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صالة أحلى الأيام</title>
+    <title>قاعة أحلى الأيام</title>
     <link rel="stylesheet" href="/static/styles.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,10 +11,11 @@
 <body>
     <header>
         <div class="container navbar">
-            <div class="logo">أحلى الأيام</div>
+            <div class="logo">قاعة أحلى الأيام</div>
             <nav class="nav-links">
                 <a href="#gallery">معرض الصور</a>
                 <a href="#pricing">الأسعار</a>
+                <a href="#location">موقع القاعة</a>
                 <a href="#booking">احجز الآن</a>
             </nav>
         </div>
@@ -27,7 +28,7 @@
         <div class="hero-overlay"></div>
         <div class="container hero-content">
             <h1>احتفل بأجمل أيامك</h1>
-            <p>اكتشف الأناقة والفخامة في صالة أحلى الأيام. نحن نوفر المكان المثالي لحفلات الزفاف والمؤتمرات والاحتفالات الكبرى.</p>
+            <p>اكتشف الأناقة والفخامة في قاعة أحلى الأيام. نحن نوفر المكان المثالي لحفلات الزفاف والمؤتمرات والاحتفالات الكبرى.</p>
             <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                 <a href="#booking" class="btn">التحقق من التوفر</a>
                 <button id="muteToggle" class="btn" style="background-color: rgba(0,0,0,0.6); color: #fff; border: 1px solid var(--primary-gold);">
@@ -40,8 +41,13 @@
     <section id="gallery" class="section">
         <div class="container" style="max-width: 100%; overflow: hidden; padding: 0;">
             <h2 class="section-title">معرض الصور</h2>
-            <div class="marquee-wrapper">
-                <div class="marquee-content" id="galleryContainer">
+            <div class="marquee-wrapper marquee-top">
+                <div class="marquee-content" id="galleryContainerTop">
+                    <!-- Images loaded dynamically from API -->
+                </div>
+            </div>
+            <div class="marquee-wrapper marquee-bottom" style="margin-top: 15px;">
+                <div class="marquee-content" id="galleryContainerBottom">
                     <!-- Images loaded dynamically from API -->
                 </div>
             </div>
@@ -53,7 +59,7 @@
             <div class="pricing-card">
                 <h3>السعر اليومي</h3>
                 <div class="price" id="dailyPrice">جاري التحميل...</div>
-                <p>استمتع بالوصول الكامل للصالة وجميع المرافق الأساسية بسعر ثابت ومميز.</p>
+                <p>استمتع بالوصول الكامل للقاعة وجميع المرافق الأساسية بسعر ثابت ومميز.</p>
                 <br>
                 <a href="#booking" class="btn btn-outline">احجز الآن</a>
             </div>
@@ -62,7 +68,7 @@
 
     <section id="booking" class="section">
         <div class="container">
-            <h2 class="section-title">حجز الصالة</h2>
+            <h2 class="section-title">حجز القاعة</h2>
             <div class="booking-form">
                 <div id="bookingMessage" class="message"></div>
                 <form id="bookingForm">
@@ -95,6 +101,25 @@
                                 <option value="عزاء">عزاء</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="pay_deposit">هل تريد دفع عربون؟</label>
+                            <select id="pay_deposit" required>
+                                <option value="لا" selected>لا</option>
+                                <option value="نعم">نعم</option>
+                            </select>
+                        </div>
+
+                        <div id="depositInfoBox" style="display: none; background: rgba(212, 175, 55, 0.08); border: 1px dashed var(--primary-gold); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: right;">
+                            <p style="margin-bottom: 8px; font-weight: bold; color: var(--primary-gold); font-size: 0.95rem;">🏛 تفاصيل الحساب البنكي لتحويل العربون:</p>
+                            <p style="margin-bottom: 5px; font-size: 0.9rem;"><strong>البنك:</strong> <span id="displayBankName" style="color: #fff;">مصرف الكريمي</span></p>
+                            <p style="margin-bottom: 5px; font-size: 0.9rem;"><strong>اسم صاحب الحساب:</strong> <span id="displayAccountName" style="color: #fff;">قاعة أحلى الأيام</span></p>
+                            <p style="margin-bottom: 12px; font-size: 0.9rem;"><strong>رقم الحساب:</strong> <span id="displayAccountNumber" style="user-select: all; font-weight: bold; color: var(--primary-gold); font-size: 1rem;">123456789</span></p>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="deposit_receipt" style="font-size: 0.85rem;">إرفاق صورة سند التحويل / الإيصال (اختياري)</label>
+                                <input type="file" id="deposit_receipt" accept="image/*" style="font-size: 0.85rem; padding: 6px;">
+                            </div>
+                        </div>
                         <button type="submit" class="btn" style="width: 100%;">إرسال طلب الحجز</button>
                     </div>
                 </form>
@@ -102,9 +127,27 @@
         </div>
     </section>
 
+    <section id="location" class="section" style="background-color: var(--dark-surface);">
+        <div class="container" style="text-align: center; max-width: 800px;">
+            <h2 class="section-title">موقع القاعة</h2>
+            <div style="background: rgba(212, 175, 55, 0.03); border: 1px solid rgba(212, 175, 55, 0.1); padding: 40px 20px; border-radius: 12px; margin-top: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <div style="font-size: 3.5rem; color: var(--primary-gold); margin-bottom: 20px;">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3 style="color: #fff; margin-bottom: 15px; font-size: 1.5rem;">تشرفنا زيارتكم في موقعنا</h3>
+                <p style="color: var(--text-muted); margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; font-size: 1.1rem; line-height: 1.8;">
+                    نسعد بلقائكم وتوفير أفضل الخدمات لمناسباتكم السعيدة. يمكنك الضغط على الزر أدناه لفتح موقع القاعة مباشرة في خرائط Google للوصول بكل سهولة.
+                </p>
+                <a href="https://maps.app.goo.gl/CyZh45H86XyJKgRW6?g_st=ic" target="_blank" class="btn" style="padding: 12px 35px; font-size: 1.1rem; border-radius: 8px;">
+                    <i class="fas fa-directions" style="margin-left: 8px;"></i> الاتجاهات على خرائط Google
+                </a>
+            </div>
+        </div>
+    </section>
+
     <footer>
         <div class="container">
-            <h3 class="logo" style="margin-bottom: 20px;">أحلى الأيام</h3>
+            <h3 class="logo" style="margin-bottom: 20px;">قاعة أحلى الأيام</h3>
             <p style="margin-bottom: 10px;">تواصل معنا: <span id="contactPhone" style="font-weight:bold; color:var(--primary-gold);">+967 773683333</span></p>
             <div style="margin-bottom: 20px; font-size: 1.5rem;">
                 <a href="https://www.facebook.com/share/1LKyHrViT9/?mibextid=wwXIfr" target="_blank" style="color: var(--primary-gold); margin: 0 15px; text-decoration: none; transition: var(--transition);"><i class="fab fa-facebook"></i></a>
@@ -112,10 +155,10 @@
                 <a href="https://youtube.com/channel/UCwqhTuCL3WpXv9ZYNL9DJhQ?si=XwZPZA_KOVwtz21r" target="_blank" style="color: var(--primary-gold); margin: 0 15px; text-decoration: none; transition: var(--transition);"><i class="fab fa-youtube"></i></a>
                 <a href="https://wa.me/967773683333" target="_blank" style="color: var(--primary-gold); margin: 0 15px; text-decoration: none; transition: var(--transition);"><i class="fab fa-whatsapp"></i></a>
             </div>
-            <p>&copy; 2026 صالة أحلى الأيام. جميع الحقوق محفوظة.</p>
+            <p>&copy; 2026 قاعة أحلى الأيام. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
-    <script src="/static/app.js?v=2"></script>
+    <script src="/static/app.js?v=6"></script>
 </body>
 </html>

@@ -1,9 +1,11 @@
 fastapi
 uvicorn[standard]
-sqlalchemy
+pymongo[srv]
+dnspython
 python-jose[cryptography]
 passlib[bcrypt]
 bcrypt
 python-multipart
 pydantic
 pydantic-settings
+

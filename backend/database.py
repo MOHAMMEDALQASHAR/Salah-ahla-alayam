@@ -1,20 +1,21 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
+from pymongo import MongoClient
 
-# Connect to postgres. Use environment variable or default. 
-# Changed default to sqlite to run instantly out-of-the-box
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ahla_alayam.db")
+DEFAULT_URI = (
+    "mongodb://alqashar0_db_user:Mtm775070_981@"
+    "ac-rfe4z7p-shard-00-00.gcalylm.mongodb.net:27017,"
+    "ac-rfe4z7p-shard-00-01.gcalylm.mongodb.net:27017,"
+    "ac-rfe4z7p-shard-00-02.gcalylm.mongodb.net:27017/"
+    "ahla_alayam?ssl=true&authSource=admin&retryWrites=true&w=majority"
+)
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+MONGODB_URI = os.getenv("MONGODB_URI", DEFAULT_URI)
 
-Base = declarative_base()
+client = MongoClient(MONGODB_URI)
+
+# Database instance
+db_name = os.getenv("MONGODB_DB_NAME", "ahla_alayam")
+db = client[db_name]
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return db

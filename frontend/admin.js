@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
+            const rowValue = document.getElementById('imageRow').value;
+            formData.append('row', rowValue);
 
             try {
                 const response = await fetch('/images/', {
@@ -85,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const price = document.getElementById('setDailyPrice').value;
             const phone = document.getElementById('setContactPhone').value;
+            const bankName = document.getElementById('setBankName').value;
+            const bankAccName = document.getElementById('setBankAccountName').value;
+            const bankAccNumber = document.getElementById('setBankAccountNumber').value;
 
             try {
                 await fetch('/settings/', {
@@ -103,6 +108,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ key: 'contact_phone', value: phone })
+                });
+
+                await fetch('/settings/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ key: 'bank_name', value: bankName })
+                });
+
+                await fetch('/settings/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ key: 'bank_account_name', value: bankAccName })
+                });
+
+                await fetch('/settings/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ key: 'bank_account_number', value: bankAccNumber })
                 });
 
                 const msg = document.getElementById('settingsMessage');
@@ -152,7 +184,7 @@ async function loadBookings() {
         tbody.innerHTML = '';
 
         if (bookings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">لا توجد حجوزات حالياً</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 40px;">لا توجد حجوزات حالياً</td></tr>';
             return;
         }
 
@@ -160,6 +192,8 @@ async function loadBookings() {
             const statusText = statusLabels[b.status] || b.status;
             const idCard = b.id_card_number || '—';
             const eventType = b.event_type || '—';
+            const payDepositText = b.pay_deposit === 'نعم' ? '<span style="color: var(--primary-gold); font-weight: bold;">نعم</span>' : '<span style="color: var(--text-muted);">لا</span>';
+            const receiptBtn = b.deposit_receipt ? `<a href="/uploads/${b.deposit_receipt}" target="_blank" class="btn" style="padding: 4px 8px; font-size: 0.8rem; text-decoration: none;">📸 عرض السند</a>` : '<span style="color: var(--text-muted); font-size: 0.85rem;">بدون سند</span>';
             
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -168,11 +202,13 @@ async function loadBookings() {
                 <td dir="ltr" style="text-align: right;">${b.contact_phone}</td>
                 <td>${idCard}</td>
                 <td>${eventType}</td>
+                <td>${payDepositText}</td>
+                <td>${receiptBtn}</td>
                 <td><span class="status-badge status-${b.status}">${statusText}</span></td>
                 <td>
-                    <button class="action-btn" onclick="updateStatus(${b.id}, 'confirmed')" title="تأكيد">✅ تأكيد</button>
-                    <button class="action-btn" onclick="updateStatus(${b.id}, 'cancelled')" title="إلغاء">❌ إلغاء</button>
-                    <button class="action-btn" onclick="deleteBooking(${b.id})" style="color: var(--error)" title="حذف">🗑 حذف</button>
+                    <button class="action-btn" onclick="updateStatus('${b.id}', 'confirmed')" title="تأكيد">✅ تأكيد</button>
+                    <button class="action-btn" onclick="updateStatus('${b.id}', 'cancelled')" title="إلغاء">❌ إلغاء</button>
+                    <button class="action-btn" onclick="deleteBooking('${b.id}')" style="color: var(--error)" title="حذف">🗑 حذف</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -224,7 +260,7 @@ async function loadAdminGallery() {
             div.className = 'gallery-item';
             div.innerHTML = `
                 <img src="/uploads/${img.filename}" alt="${img.filename}">
-                <button class="delete-btn" onclick="deleteImage(${img.id})">🗑 حذف</button>
+                <button class="delete-btn" onclick="deleteImage('${img.id}')">🗑 حذف</button>
             `;
             container.appendChild(div);
         });
@@ -256,9 +292,75 @@ async function loadAdminSettings() {
                 document.getElementById('setDailyPrice').value = setting.value;
             } else if(setting.key === 'contact_phone') {
                 document.getElementById('setContactPhone').value = setting.value;
+            } else if(setting.key === 'bank_name') {
+                document.getElementById('setBankName').value = setting.value;
+            } else if(setting.key === 'bank_account_name') {
+                document.getElementById('setBankAccountName').value = setting.value;
+            } else if(setting.key === 'bank_account_number') {
+                document.getElementById('setBankAccountNumber').value = setting.value;
             }
         });
     } catch (error) {
         console.error('Error loading settings:', error);
+    }
+}
+
+async function exportToExcel() {
+    const btn = document.getElementById('exportExcelBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> جاري التحضير...';
+
+    try {
+        const response = await fetch('/bookings/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.status === 401) { logout(); return; }
+
+        const bookings = await response.json();
+
+        if (bookings.length === 0) {
+            alert('لا توجد حجوزات لتصديرها.');
+            return;
+        }
+
+        // تحضير البيانات
+        const rows = bookings.map((b, i) => ({
+            '#': i + 1,
+            'التاريخ': b.date || '',
+            'اسم العميل': b.customer_name || '',
+            'رقم الهاتف': b.contact_phone || '',
+            'رقم البطاقة': b.id_card_number || '',
+            'نوع المناسبة': b.event_type || '',
+            'العربون': b.pay_deposit || 'لا',
+            'الحالة': statusLabels[b.status] || b.status || '',
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(rows, { origin: 'A1' });
+
+        // تعيين عرض الأعمدة
+        worksheet['!cols'] = [
+            { wch: 5 },   // #
+            { wch: 14 },  // التاريخ
+            { wch: 28 },  // اسم العميل
+            { wch: 18 },  // رقم الهاتف
+            { wch: 18 },  // رقم البطاقة
+            { wch: 18 },  // نوع المناسبة
+            { wch: 10 },  // العربون
+            { wch: 16 },  // الحالة
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'الحجوزات');
+
+        // اسم الملف مع التاريخ
+        const today = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(workbook, `حجوزات_أحلى_الأيام_${today}.xlsx`);
+
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('حدث خطأ أثناء تصدير البيانات.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📊</span> تنزيل Excel';
     }
 }
